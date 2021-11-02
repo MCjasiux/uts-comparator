@@ -1,10 +1,13 @@
 package agh
 import scala.io.Source
 import org.jsoup.Jsoup
-
+import agh.Surface._
     class Fetcher() {
         def fetch(id1:Int,id2:Int){
-            val html = Source.fromURL("https://www.ultimatetennisstatistics.com/h2hProfiles?playerId1="+id1+"&playerId2="+id2)
+            var html:Option[scala.io.BufferedSource] = None
+            val p = new Player("michal",1,1,1,Synthetic,10)
+            try{
+            html = Some(Source.fromURL("https://www.ultimatetennisstatistics.com/h2hProfiles?playerId1="+id1+"&playerId2="+id2))
             val str = html.mkString
             val document = Jsoup.parse(str)
             val names = Array(document.select("a").get(0).text(),document.select("a").get(1).text())  //imiona tenisistów
@@ -15,6 +18,12 @@ import org.jsoup.Jsoup
             println(titles(0)," : "+titles(1))
             println(ranks(0)," : "+ranks(1))
             println(elos(0)," : "+elos(1))
+            }catch{
+                case ex:Exception =>{
+                    println("Error fetching data")
+                }
+            }
+
 
         }
 }

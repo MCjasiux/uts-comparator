@@ -2,7 +2,7 @@ package agh
 import scala.io.Source
 
 object Main extends App {
-  val fetcher = new Fetcher()
-  fetcher.fetch(27834,4913)
+  val comparator = new Comparator()
+  comparator.compare(Array(27834,4913))
 
 }

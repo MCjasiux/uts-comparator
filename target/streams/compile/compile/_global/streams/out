@@ -1,4 +1,0 @@
-[0m[[0m[31merror[0m] [0m[0mD:\AGH\Metody i Algorytmy Podejmowania Decyzji\projekt1\src\main\scala\Main.scala:10:52: ';' expected but ',' found.[0m
-[0m[[0m[31merror[0m] [0m[0m    val names = {document.select("a").get(0).text(),document.select("a").get(0).text()}[0m
-[0m[[0m[31merror[0m] [0m[0m                                                   ^[0m
-[0m[[0m[31merror[0m] [0m[0mone error found[0m
