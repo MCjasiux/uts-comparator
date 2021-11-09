@@ -5,5 +5,8 @@ ThisBuild / organization := "com.example"
 lazy val hello = (project in file("."))
   .settings(
     name := "Hello",
-    libraryDependencies += "org.jsoup" % "jsoup" % "1.14.3"
+    libraryDependencies ++= Seq(
+      "org.jsoup" % "jsoup" % "1.14.3",
+      "org.scalanlp" %% "breeze" % "1.2"
+    )
   )
