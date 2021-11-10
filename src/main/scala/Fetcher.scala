@@ -18,9 +18,23 @@ import agh.Surface._
             val pattern1 = new Regex("\\(\\d*?\\)")
             val pattern2 = new Regex("\\d*?\\.\\d*?\\%")
 
+            /*
+            Niektórzy tenisiści brali udział w Pucharach Davisa, dzięki czemu w tabeli porównawczej jest
+            więcej wierszy. Regex próbuje wydostać liczbę z oczekiwanej wartości z trzech komórek z otoczenia trzech wierszy
+            w przypadku przesunięcia wartość będzie pusta, bo spróbuje pobrać datę zamiast liczby
+            */
+            val textLeft= document.select("td.text-right")
+            val textRight = document.select("td.text-left")
+            val elos = Array("","")
+            var i =0
+            for( i <- 1 to 3){
+                elos(0)+= (pattern1 findAllIn textLeft.get(26+i).text()).mkString("").stripPrefix("(").stripSuffix(")")
+                elos(1)+= (pattern1 findAllIn textRight.get(26+i).text()).mkString("").stripPrefix("(").stripSuffix(")")
+            }
+            
             // val elos = Array(
-            //     (pattern1 findAllIn document.select("td.text-right").get(27).text()).mkString("").stripPrefix("(").stripSuffix(")").toInt,
-            //     (pattern1 findAllIn document.select("td.text-left").get(27).text()).mkString("").stripPrefix("(").stripSuffix(")").toInt
+            //     (pattern1 findAllIn textLeft.get(27).text()).mkString("").stripPrefix("(").stripSuffix(")").toInt,
+            //     (pattern1 findAllIn textRight.get(27).text()).mkString("").stripPrefix("(").stripSuffix(")").toInt
             //     )
 
 
@@ -29,7 +43,7 @@ import agh.Surface._
                 (pattern2 findAllIn document.select("[title='Show H2H matches']").get(1).text()).mkString("").stripSuffix("%").toFloat
                 )
             
-            val clayMatches = Array(
+            val clayMatches:Array[Float] = Array(
                 (pattern2 findAllIn document.select("[title='Show clay matches']").get(0).text()).mkString("").stripSuffix("%").toFloat,
                 (pattern2 findAllIn document.select("[title='Show clay matches']").get(1).text()).mkString("").stripSuffix("%").toFloat
             )
@@ -47,11 +61,25 @@ import agh.Surface._
             )
 
             println(names(0)," : "+names(1))        //pełne imiona tenisistów
-           // println(elos(0)," : "+elos(1))          //punkty elo
+            println(elos(0)," : "+elos(1))          //punkty elo
             println(surfaceAdjusted(0),surfaceAdjusted(1))  //surface adjusted h2h [%]
-            println(clayMatches(0),clayMatches(1))     
+            println(clayMatches(0),clayMatches(1))     //%wygranych na danej powierzchni
 
-          //  val h2h = new H2h(names(0)+" vs "+names(1),)
+            val surfaceStats =  Map(
+                Clay -> clayMatches,
+                Hard ->  hardMatches,
+                Carpet -> carpetMatches,
+                Grass -> grassMatches 
+            )
+
+
+            val out = new H2h(
+                names(0)+" vs " + names(1),
+                surfaceAdjusted,
+                elos,
+                surfaceStats
+            )
+
             }catch{
                 case ex:Exception =>{
                     println("Error fetching data")
