@@ -1,8 +1,9 @@
 package agh
 
 import agh.Surface._
-class H2h(_name:String, _elo:Int,_surfaceWin:Int){
+class H2h(_name:String, _prediction:Array[Float],_elos:Array[String],_surfaceWins:Map[Surface,Array[Float]]){
      def name = _name
-     def elo = _elo
-     def surfaceWin = _surfaceWin
+     def prediction = _prediction
+     def elos = _elos
+     def surfaceWins = _surfaceWins
 }
