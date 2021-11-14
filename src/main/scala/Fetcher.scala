@@ -4,9 +4,9 @@ import org.jsoup.Jsoup
 import scala.util.matching.Regex
 import agh.Surface._
     class Fetcher() {
-        def fetch(id1:Int,id2:Int){
+        def fetch(id1:Int,id2:Int): Any={
             //var html:Option[scala.io.BufferedSource] = None
-            
+            var out: Any = 0
             try{
             val html = Source.fromURL("https://www.ultimatetennisstatistics.com/h2hProfiles?playerId1="+id1+"&playerId2="+id2)
             val str = html.mkString
@@ -72,19 +72,23 @@ import agh.Surface._
                 Grass -> grassMatches 
             )
 
-
-            val out = new H2h(
+            out = new H2h(
                 names(0)+" vs " + names(1),
                 surfaceAdjusted,
                 elos,
                 surfaceStats
             )
 
+
             }catch{
                 case ex:Exception =>{
                     println("Error fetching data")
                     println(ex)
+                    None
                 }
+            }
+            finally {
+                return out
             }
 
 
