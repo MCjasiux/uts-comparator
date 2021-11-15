@@ -89,11 +89,11 @@ class Comparator(){
     }
     def getNames(fetchMatrix: Array[Array[Any]]): Array[String] ={
         val result = Array.ofDim[String](fetchMatrix.length)
-        var split = fetchMatrix(1)(0).asInstanceOf[H2h].name.split(" ")
-        result(0) = split(3) + split(4)
+        var split = fetchMatrix(1)(0).asInstanceOf[H2h].name.split("vs")
+        result(0) = split(1)
         for (i <- 1 until fetchMatrix.length){
-            split = fetchMatrix(0)(i).asInstanceOf[H2h].name.split(" ")
-            result(i) = split(3) + split(4)
+            split = fetchMatrix(0)(i).asInstanceOf[H2h].name.split("vs")
+            result(i) = split(1)
         }
 
         result
