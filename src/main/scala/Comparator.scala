@@ -31,61 +31,77 @@ class Comparator(){
 
         val h2hMatrix = Array.ofDim[Double](players.length, players.length)
         for {i <- h2hMatrix.indices
-             j <- i until h2hMatrix.length
+             j <- h2hMatrix.indices
              } {
             if(i == j) h2hMatrix(i)(j) = 1.0
-            else if(i > j) h2hMatrix(i)(j) = fetchMatrix(i)(j).asInstanceOf[H2h].prediction(0)
-            else h2hMatrix(i)(j) = 1/h2hMatrix(j)(i)
+            else h2hMatrix(i)(j) = fetchMatrix(i)(j).asInstanceOf[H2h].prediction(0) / fetchMatrix(i)(j).asInstanceOf[H2h].prediction(1)
         }
+        print("h2h matrix: \n")
+        print(h2hMatrix.map(_.mkString(" ")).mkString("\n"))
+        print("\n")
         val h2hMatrixB = normalizeToB(h2hMatrix)
         val rankMatrix = Array.ofDim[Double](players.length, players.length)
         for {i <- rankMatrix.indices
-             j <- i until rankMatrix.length
+             j <- rankMatrix.indices
              } {
             if(i == j)  rankMatrix(i)(j) = 1.0
-            else if (i > j) rankMatrix(i)(j) = rankFunction(fetchMatrix(i)(j).asInstanceOf[H2h].elos(0).toDouble - fetchMatrix(i)(j).asInstanceOf[H2h].elos(1).toDouble)
-            else if (i < j) rankMatrix(i)(j) = 1/rankMatrix(j)(i)
+            else if (i < j) rankMatrix(i)(j) = rankFunction(fetchMatrix(i)(j).asInstanceOf[H2h].elos(0).toDouble - fetchMatrix(i)(j).asInstanceOf[H2h].elos(1).toDouble)
+            else  rankMatrix(i)(j) = 1/rankMatrix(j)(i)
         }
+        print("elo matrix: \n")
+        print(rankMatrix.map(_.mkString(" ")).mkString("\n"))
+        print("\n")
         val rankMatrixB = normalizeToB(rankMatrix)
         val winRatioMatrix = Array.ofDim[Double](players.length, players.length)
         for {i <- winRatioMatrix.indices
-             j <- i until winRatioMatrix.length
+             j <- winRatioMatrix.indices
              } {
 
             if(i == j)  winRatioMatrix(i)(j) = 1
-            else if (i > j) winRatioMatrix(i)(j) = fetchMatrix(i)(j).asInstanceOf[H2h].surfaceWins(surface)(0) / fetchMatrix(i)(j).asInstanceOf[H2h].surfaceWins(surface)(1)
+            else if (i < j) winRatioMatrix(i)(j) = fetchMatrix(i)(j).asInstanceOf[H2h].surfaceWins(surface)(0) / fetchMatrix(i)(j).asInstanceOf[H2h].surfaceWins(surface)(1)
             else winRatioMatrix(i)(j) =  1/winRatioMatrix(j)(i)
         }
+        print("winRatio matrix: \n")
+        print(winRatioMatrix.map(_.mkString(" ")).mkString("\n"))
+        print("\n")
         val winRatioMatrixB = normalizeToB(winRatioMatrix)
         val names = getNames(fetchMatrix)
         val h2hVector: Array[Double] = toWVector(h2hMatrixB)
+        print("h2h comparison: \n")
         printWithNames(h2hVector, names)
         calculateCI(h2hVector, h2hMatrix)
+        print("\n")
         val rankVector: Array[Double]= toWVector(rankMatrixB)
+        print("elo comparison: \n")
         printWithNames(rankVector, names)
         calculateCI(rankVector, rankMatrix)
+        print("\n")
         val winRatioVector: Array[Double] = toWVector(winRatioMatrixB)
+        print("winRatio comparison: \n")
         printWithNames(winRatioVector, names)
         calculateCI(winRatioVector, winRatioMatrix)
+        print("\n")
         val result = calculateFinalWeights(h2hVector, rankVector, winRatioVector, toWVector(characterMatrixB))
-
-
+        print("Final comparison: \n")
+        printWithNames(result, names)
+        print("\n")
+        print("Our choice: " + names(result.indexOf(result.max)))
     }
     def getNames(fetchMatrix: Array[Array[Any]]): Array[String] ={
         val result = Array.ofDim[String](fetchMatrix.length)
         var split = fetchMatrix(1)(0).asInstanceOf[H2h].name.split(" ")
-        result(0) = split(0) + split(1)
+        result(0) = split(3) + split(4)
         for (i <- 1 until fetchMatrix.length){
             split = fetchMatrix(0)(i).asInstanceOf[H2h].name.split(" ")
-            result(i) = split(0) + split(1)
+            result(i) = split(3) + split(4)
         }
 
         result
     }
 
     def rankFunction(rank: Double): Double ={
-        if(rank > 0) (scala.math.pow(rank, 1/3)/2) + 0.5
-        else 1/(scala.math.pow(scala.math.abs(rank), 1/3)/2) + 0.5
+        if(rank > 0) ((scala.math.cbrt(rank)/4) + 0.75)
+        else 1/((scala.math.cbrt(scala.math.abs(rank))/4) + 0.75)
     }
     def normalizeToB(matrix: Array[Array[Double]]): Array[Array[Double]] ={
         val accArray = Array.ofDim[Double](matrix.length)
