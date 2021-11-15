@@ -14,15 +14,18 @@ import agh.Surface._
 
 
             val names = Array(document.select("a").get(0).text(),document.select("a").get(1).text())  //imiona tenisistów
-
+            println(names(0)," : "+names(1))        //pełne imiona tenisistów
             val pattern1 = new Regex("\\(\\d*?\\)")
             val pattern2 = new Regex("\\d*?\\.\\d*?\\%")
+
 
             /*
             Niektórzy tenisiści brali udział w Pucharach Davisa, dzięki czemu w tabeli porównawczej jest
             więcej wierszy. Regex próbuje wydostać liczbę z oczekiwanej wartości z trzech komórek z otoczenia trzech wierszy
             w przypadku przesunięcia wartość będzie pusta, bo spróbuje pobrać datę zamiast liczby
             */
+
+
             val textLeft= document.select("td.text-right")
             val textRight = document.select("td.text-left")
             val elos = Array("","")
@@ -31,38 +34,78 @@ import agh.Surface._
                 elos(0)+= (pattern1 findAllIn textLeft.get(26+i).text()).mkString("").stripPrefix("(").stripSuffix(")")
                 elos(1)+= (pattern1 findAllIn textRight.get(26+i).text()).mkString("").stripPrefix("(").stripSuffix(")")
             }
-            
+            println(elos(0)," : "+elos(1))          //punkty elo
+
             // val elos = Array(
             //     (pattern1 findAllIn textLeft.get(27).text()).mkString("").stripPrefix("(").stripSuffix(")").toInt,
             //     (pattern1 findAllIn textRight.get(27).text()).mkString("").stripPrefix("(").stripSuffix(")").toInt
             //     )
-
-
+            //var surfaceAdjusted:Array[Float] = Array(50,50)
+            
             val surfaceAdjusted = Array(
                 (pattern2 findAllIn document.select("[title='Show H2H matches']").get(0).text()).mkString("").stripSuffix("%").toFloat,
                 (pattern2 findAllIn document.select("[title='Show H2H matches']").get(1).text()).mkString("").stripSuffix("%").toFloat
                 )
             
-            val clayMatches:Array[Float] = Array(
-                (pattern2 findAllIn document.select("[title='Show clay matches']").get(0).text()).mkString("").stripSuffix("%").toFloat,
-                (pattern2 findAllIn document.select("[title='Show clay matches']").get(1).text()).mkString("").stripSuffix("%").toFloat
-            )
-            val hardMatches = Array(
-                (pattern2 findAllIn document.select("[title='Show hard matches']").get(0).text()).mkString("").stripSuffix("%").toFloat,
-                (pattern2 findAllIn document.select("[title='Show hard matches']").get(1).text()).mkString("").stripSuffix("%").toFloat
-            )
-            val carpetMatches = Array(
+
+            println(surfaceAdjusted(0),surfaceAdjusted(1))  //surface adjusted h2h [%]
+
+            var clayMatches:Array[Float] = Array(50,50)
+            try{
+                    clayMatches = Array(
+                    (pattern2 findAllIn document.select("[title='Show clay matches']").get(0).text()).mkString("").stripSuffix("%").toFloat,
+                    (pattern2 findAllIn document.select("[title='Show clay matches']").get(1).text()).mkString("").stripSuffix("%").toFloat
+                )
+            }catch{
+                case ex:Exception =>{
+                    println("One or more players has no record of clay matches, assuming 50% win rate")
+                    println(ex)
+                    None
+                }
+            }
+            var hardMatches:Array[Float] = Array(50,50)
+            try{
+                    hardMatches = Array(
+                    (pattern2 findAllIn document.select("[title='Show hard matches']").get(0).text()).mkString("").stripSuffix("%").toFloat,
+                    (pattern2 findAllIn document.select("[title='Show hard matches']").get(1).text()).mkString("").stripSuffix("%").toFloat
+                )
+            }catch{
+                case ex:Exception =>{
+                    println("One or more players has no record of hard matches, assuming 50% win rate")
+                    println(ex)
+                    None
+                }
+            }
+            var carpetMatches:Array[Float] = Array(50,50)
+            try{
+                carpetMatches = Array(
                 (pattern2 findAllIn document.select("[title='Show carpet matches']").get(0).text()).mkString("").stripSuffix("%").toFloat,
                 (pattern2 findAllIn document.select("[title='Show carpet matches']").get(1).text()).mkString("").stripSuffix("%").toFloat
             )
-            val grassMatches = Array(
+            }catch{
+                    case ex:Exception =>{
+                    println("One or more players has no record of carpet matches, assuming 50% win rate")
+                    println(ex)
+                    None
+                }
+            }
+            var grassMatches:Array[Float] = Array(50,50)
+            try{
+            grassMatches = Array(
                 (pattern2 findAllIn document.select("[title='Show grass matches']").get(0).text()).mkString("").stripSuffix("%").toFloat,
                 (pattern2 findAllIn document.select("[title='Show grass matches']").get(1).text()).mkString("").stripSuffix("%").toFloat
             )
+            }catch{
+                    case ex:Exception =>{
+                    println("One or more players has no record of grass matches, assuming 50% win rate")
+                    println(ex)
+                    None
+                }
+            }
 
-            println(names(0)," : "+names(1))        //pełne imiona tenisistów
-            println(elos(0)," : "+elos(1))          //punkty elo
-            println(surfaceAdjusted(0),surfaceAdjusted(1))  //surface adjusted h2h [%]
+
+
+
             println(clayMatches(0),clayMatches(1))     //%wygranych na danej powierzchni
 
             val surfaceStats =  Map(
