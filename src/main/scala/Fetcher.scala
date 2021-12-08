@@ -103,10 +103,18 @@ import agh.Surface._
                 }
             }
 
+        try{
+            val betHTML = Source.fromURL("https://matchstat.com/tennis/h2h-odds-bets/"+names(0)+"/"+names(1))
+            val betDocument  = Jsoup.parse(betHTML.mkString)
 
-
-
-            println(clayMatches(0),clayMatches(1))     //%wygranych na danej powierzchni
+            val bets = Array(betDocument.select("span.betrating").get(0).text(),betDocument.select("span.betrating").get(2).text())  //wyniki zakładów
+            if(bets(0)==""){    //bez danych zakładów
+                bets(0)="0"
+            }
+            if(bets(1)==""){
+                bets(1)="0"
+            }
+            println(bets(0)," : "+bets(1))          //punkty elo
 
             val surfaceStats =  Map(
                 Clay -> clayMatches,
@@ -119,8 +127,19 @@ import agh.Surface._
                 names(0)+" vs " + names(1),
                 surfaceAdjusted,
                 elos,
-                surfaceStats
+                surfaceStats,
+                Array(bets(0).toInt,bets(1).toInt)
             )
+        }catch{
+                case ex:Exception =>{
+                    println("Error fetching bets data")
+                    println(ex)
+                    None
+                }  
+        }
+
+
+
 
 
             }catch{
