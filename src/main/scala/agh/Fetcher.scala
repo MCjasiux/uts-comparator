@@ -1,8 +1,9 @@
 package agh
-import scala.io.Source
-import org.jsoup.Jsoup
-import scala.util.matching.Regex
 import agh.Surface._
+import org.jsoup.Jsoup
+
+import scala.io.Source
+import scala.util.matching.Regex
     class Fetcher() {
         def fetch(id1:Int,id2:Int): Any={
             //var html:Option[scala.io.BufferedSource] = None
