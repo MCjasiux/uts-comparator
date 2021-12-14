@@ -1,10 +1,34 @@
 package agh
+
+import javax.net.ssl._
+import java.security.cert.X509Certificate
+
 import agh.Surface._
 import org.jsoup.Jsoup
-
 import scala.io.Source
 import scala.util.matching.Regex
+
+// Bypasses both client and server validation.
+object TrustAll extends X509TrustManager {
+  val getAcceptedIssuers = null
+
+  override def checkClientTrusted(x509Certificates: Array[X509Certificate], s: String) = {}
+
+  override def checkServerTrusted(x509Certificates: Array[X509Certificate], s: String) = {}
+}
+
+// Verifies all host names by simply returning true.
+object VerifiesAllHostNames extends HostnameVerifier {
+  def verify(s: String, sslSession: SSLSession) = true
+}
+
+
     class Fetcher() {
+        val sslContext = SSLContext.getInstance("SSL")
+        sslContext.init(null, Array(TrustAll), new java.security.SecureRandom())
+        HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory)
+        HttpsURLConnection.setDefaultHostnameVerifier(VerifiesAllHostNames)
+
         def fetch(id1:Int,id2:Int): Any={
             //var html:Option[scala.io.BufferedSource] = None
             var out: Any = 0
@@ -103,20 +127,27 @@ import scala.util.matching.Regex
                     None
                 }
             }
+        var bets =Array("0","0")
 
         try{
             val betHTML = Source.fromURL("https://matchstat.com/tennis/h2h-odds-bets/"+names(0)+"/"+names(1))
             val betDocument  = Jsoup.parse(betHTML.mkString)
 
-            val bets = Array(betDocument.select("span.betrating").get(0).text(),betDocument.select("span.betrating").get(2).text())  //wyniki zakładów
+            bets = Array(betDocument.select("span.betrating").get(0).text(),betDocument.select("span.betrating").get(2).text())  //wyniki zakładów
             if(bets(0)==""){    //bez danych zakładów
                 bets(0)="0"
             }
             if(bets(1)==""){
                 bets(1)="0"
             }
-            println(bets(0)," : "+bets(1))          //punkty elo
-
+            println(bets(0)," : "+bets(1))         
+            }catch{
+                case ex:Exception =>{
+                    println("Error fetching bets data")
+                    println(ex)
+                    None
+                }  
+            }
             val surfaceStats =  Map(
                 Clay -> clayMatches,
                 Hard ->  hardMatches,
@@ -131,13 +162,7 @@ import scala.util.matching.Regex
                 surfaceStats,
                 Array(bets(0).toInt,bets(1).toInt)
             )
-        }catch{
-                case ex:Exception =>{
-                    println("Error fetching bets data")
-                    println(ex)
-                    None
-                }  
-        }
+        
 
 
 
