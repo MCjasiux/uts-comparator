@@ -108,24 +108,30 @@ class Comparator(){
         print("h2h comparison: \n")
         printWithNames(h2hVector, names)
         calculateCI(h2hVector, h2hMatrix)
+        koczkodajIndex(h2hMatrix.length, h2hMatrix)
+
         print("\n")
 
         val rankVector: Array[Double]= toWVector(rankMatrixB)
         print("elo comparison: \n")
         printWithNames(rankVector, names)
         calculateCI(rankVector, rankMatrix)
+        koczkodajIndex(rankMatrix.length, rankMatrix)
+
         print("\n")
 
         val winRatioVector: Array[Double] = toWVector(winRatioMatrixB)
         print("winRatio comparison: \n")
         printWithNames(winRatioVector, names)
         calculateCI(winRatioVector, winRatioMatrix)
+        koczkodajIndex(winRatioMatrix.length, winRatioMatrix)
         print("\n")
 
         val betVector: Array[Double]= toWVector(betMatrixB)
         print("bet comparison: \n")
         printWithNames(betVector, names)
         calculateCI(betVector, betMatrix)
+        koczkodajIndex(betMatrix.length, betMatrix)
         print("\n")
 
         val result = calculateFinalWeights(h2hVector, rankVector, winRatioVector,betVector,  toWVector(characterMatrixB))
@@ -151,24 +157,30 @@ class Comparator(){
         print("h2h comparison: \n")
         printWithNames(h2hVectorN, names)
         calculateCIGMM(h2hVector)
+        koczkodajIndex(h2hMatrix.length, h2hMatrix)
         print("\n")
 
         val rankVectorN: Array[Double]= normalizeVector(rankVector)
         print("elo comparison: \n")
         printWithNames(rankVectorN, names)
         calculateCIGMM(rankVector)
+        koczkodajIndex(rankMatrix.length, rankMatrix)
         print("\n")
 
         val winRatioVectorN: Array[Double] = normalizeVector(winRatioVector)
         print("winRatio comparison: \n")
         printWithNames(winRatioVectorN, names)
         calculateCIGMM(winRatioVector)
+        koczkodajIndex(winRatioMatrix.length, winRatioMatrix)
+
         print("\n")
 
         val betVectorN: Array[Double]= normalizeVector(betVector)
         print("bet comparison: \n")
         printWithNames(betVectorN, names)
         calculateCIGMM(betVector)
+        koczkodajIndex(betMatrix.length, betMatrix)
+
         print("\n")
 
         val result = calculateFinalWeights(h2hVectorN, rankVectorN, winRatioVectorN,betVectorN, normalizeVector(toGMMVector(characteristicsPairCompMatrix)))
@@ -271,6 +283,38 @@ class Comparator(){
         val CI = (maxEigen - m)/(m - 1)
         println("CI: " + CI)
         println("RI: " + CI*100/saatyValues(characteristicsPairCompMatrix.length) + "%")
+    }
+    def permutations(n: Int): Int = {
+        var acc = 1
+        for (i <- 1 to n){
+            acc*=i
+        }
+        acc
+    }
+
+    def combinations(n: Int, k: Int): Int =
+        permutations(n) / (permutations(k) * permutations(n - k))
+
+
+    def koczkodajIndex(nrOfAlternatives: Int,  A: Array[Array[Double]]): Unit ={
+        val triads = Array.ofDim[Array[Int]](combinations(nrOfAlternatives, 3))
+        var index = 0
+        for(i <- 0 to triads.length-3){
+            for(j<- i + 1 to triads.length-2){
+                for(k <- j+1 to triads.length-1){
+                    triads(index) = Array[Int](i,j,k)
+                    index+=1
+                }
+            }
+        }
+        val triadInconsistencies = Array.ofDim[Double](combinations(nrOfAlternatives, 3))
+        for (i <- triadInconsistencies.indices){
+            triadInconsistencies(i) = math.min(math.abs(1-(A(triads(i)(0))(triads(i)(2))*A(triads(i)(2))(triads(i)(1))/A(triads(i)(0))(triads(i)(1)))),math.abs(1-(A(triads(i)(0))(triads(i)(1))/A(triads(i)(0))(triads(i)(2))*A(triads(i)(2))(triads(i)(1)))))
+        }
+        val koczkodajIndex = triadInconsistencies.max
+        println("koczkodajIndex: " + koczkodajIndex)
+        val limit = 1/(1- koczkodajIndex) -1
+        println("CI limit: " + limit)
     }
     def calculateFinalWeights(h2h: Array[Double], rank: Array[Double], ratio: Array[Double],bet: Array[Double], factorWeights: Array[Double]): Array[Double] ={
         for(i <- h2h.indices.toArray) yield h2h(i)*factorWeights(0) + rank(i)*factorWeights(1) + ratio(i)*factorWeights(2) + bet(i)*factorWeights(3)
