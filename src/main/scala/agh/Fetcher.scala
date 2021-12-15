@@ -59,7 +59,7 @@ object VerifiesAllHostNames extends HostnameVerifier {
                 elos(0)+= (pattern1 findAllIn textLeft.get(26+i).text()).mkString("").stripPrefix("(").stripSuffix(")")
                 elos(1)+= (pattern1 findAllIn textRight.get(26+i).text()).mkString("").stripPrefix("(").stripSuffix(")")
             }
-            println(elos(0)," : "+elos(1))          //punkty elo
+           // println(elos(0)," : "+elos(1))          //punkty elo
 
             // val elos = Array(
             //     (pattern1 findAllIn textLeft.get(27).text()).mkString("").stripPrefix("(").stripSuffix(")").toInt,
@@ -73,9 +73,9 @@ object VerifiesAllHostNames extends HostnameVerifier {
                 )
             
 
-            println(surfaceAdjusted(0),surfaceAdjusted(1))  //surface adjusted h2h [%]
+           // println(surfaceAdjusted(0),surfaceAdjusted(1))  //surface adjusted h2h [%]
 
-            var clayMatches:Array[Float] = Array(50,50)
+            var clayMatches:Array[Float] = Array(0,0)
             try{
                     clayMatches = Array(
                     (pattern2 findAllIn document.select("[title='Show clay matches']").get(0).text()).mkString("").stripSuffix("%").toFloat,
@@ -83,12 +83,12 @@ object VerifiesAllHostNames extends HostnameVerifier {
                 )
             }catch{
                 case ex:Exception =>{
-                    println("One or more players has no record of clay matches, assuming 50% win rate")
+                    //println("One or more players has no record of clay matches, assuming 50% win rate")
                     println(ex)
                     None
                 }
             }
-            var hardMatches:Array[Float] = Array(50,50)
+            var hardMatches:Array[Float] = Array(0,0)
             try{
                     hardMatches = Array(
                     (pattern2 findAllIn document.select("[title='Show hard matches']").get(0).text()).mkString("").stripSuffix("%").toFloat,
@@ -96,12 +96,12 @@ object VerifiesAllHostNames extends HostnameVerifier {
                 )
             }catch{
                 case ex:Exception =>{
-                    println("One or more players has no record of hard matches, assuming 50% win rate")
+                    //println("One or more players has no record of hard matches, assuming 50% win rate")
                     println(ex)
                     None
                 }
             }
-            var carpetMatches:Array[Float] = Array(50,50)
+            var carpetMatches:Array[Float] = Array(0,0)
             try{
                 carpetMatches = Array(
                 (pattern2 findAllIn document.select("[title='Show carpet matches']").get(0).text()).mkString("").stripSuffix("%").toFloat,
@@ -109,12 +109,12 @@ object VerifiesAllHostNames extends HostnameVerifier {
             )
             }catch{
                     case ex:Exception =>{
-                    println("One or more players has no record of carpet matches, assuming 50% win rate")
+                   // println("One or more players has no record of carpet matches, assuming 50% win rate")
                     println(ex)
                     None
                 }
             }
-            var grassMatches:Array[Float] = Array(50,50)
+            var grassMatches:Array[Float] = Array(0,0)
             try{
             grassMatches = Array(
                 (pattern2 findAllIn document.select("[title='Show grass matches']").get(0).text()).mkString("").stripSuffix("%").toFloat,
@@ -122,7 +122,7 @@ object VerifiesAllHostNames extends HostnameVerifier {
             )
             }catch{
                     case ex:Exception =>{
-                    println("One or more players has no record of grass matches, assuming 50% win rate")
+                   // println("One or more players has no record of grass matches, assuming 50% win rate")
                     println(ex)
                     None
                 }

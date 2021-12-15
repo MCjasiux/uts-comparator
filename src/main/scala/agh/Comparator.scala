@@ -85,7 +85,10 @@ class Comparator(){
         print("bet matrix: \n")
         print(betMatrix.map(_.mkString(" ")).mkString("\n"))
         print("\n")
-        Array(h2hMatrix, rankMatrix, winRatioMatrix, betMatrix)
+        
+        val completer = new Completer()
+        
+        Array(h2hMatrix, rankMatrix, completer.complete(winRatioMatrix), betMatrix)
     }
 
     def compareEVM(players: Array[Int], surface:Surface){
