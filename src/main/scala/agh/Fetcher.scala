@@ -32,10 +32,10 @@ object VerifiesAllHostNames extends HostnameVerifier {
         def fetch(id1:Int,id2:Int): Any={
             //var html:Option[scala.io.BufferedSource] = None
             var out: Any = 0
-            try{
+           // try{
 
-                
-            val html = Source.fromURL("https://www.ultimatetennisstatistics.com/h2hProfiles?playerId1="+id1+"&playerId2="+id2)
+            val url = "https://www.ultimatetennisstatistics.com/h2hProfiles?playerId1="+id1+"&playerId2="+id2
+            val html = Source.fromURL(url)
             val str = html.mkString
             val document = Jsoup.parse(str)
 
@@ -55,24 +55,57 @@ object VerifiesAllHostNames extends HostnameVerifier {
 
             val textLeft= document.select("td.text-right")
             val textRight = document.select("td.text-left")
-            val elos = Array("","")
+            val elos = Array("0","0")
             var i =0
-            for( i <- 1 to 3){
-                elos(0)+= (pattern1 findAllIn textLeft.get(26+i).text()).mkString("").stripPrefix("(").stripSuffix(")")
-                elos(1)+= (pattern1 findAllIn textRight.get(26+i).text()).mkString("").stripPrefix("(").stripSuffix(")")
+            try{
+                for( i <- 1 to 3){
+                    elos(0)+= (pattern1 findAllIn textLeft.get(26+i).text()).mkString("").stripPrefix("(").stripSuffix(")")
+                }
+            }catch{
+                    case ex:Exception =>{
+                    println("Warning:Player with no ELO score")
+                    println(ex)
+                    None
+                }
             }
-           // println(elos(0)," : "+elos(1))          //punkty elo
+            try{
+                for( i <- 1 to 3){
+                    elos(1)+= (pattern1 findAllIn textRight.get(26+i).text()).mkString("").stripPrefix("(").stripSuffix(")")
+                }
+            }catch{
+                case ex:Exception =>{
+                    println("Warning:Player with no ELO score")
+                    println(ex)
+                    None
+                }
+            }
+
+            if(elos(0)==0){
+                elos(0)="0"
+            }
+            if(elos(1)==0){
+                elos(1)="0"
+            }
+            println(elos(0)," : "+elos(1))          //punkty elo
 
             // val elos = Array(
             //     (pattern1 findAllIn textLeft.get(27).text()).mkString("").stripPrefix("(").stripSuffix(")").toInt,
             //     (pattern1 findAllIn textRight.get(27).text()).mkString("").stripPrefix("(").stripSuffix(")").toInt
             //     )
-            //var surfaceAdjusted:Array[Float] = Array(50,50)
-            
-            val surfaceAdjusted = Array(
+            var surfaceAdjusted:Array[Float] = Array(50,50)
+                        try{
+             surfaceAdjusted = Array(
                 (pattern2 findAllIn document.select("[title='Show H2H matches']").get(0).text()).mkString("").stripSuffix("%").toFloat,
                 (pattern2 findAllIn document.select("[title='Show H2H matches']").get(1).text()).mkString("").stripSuffix("%").toFloat
                 )
+            }catch{
+                case ex:Exception =>{
+                    println("Warning:Players with no history of matches vs each other")
+                    println(ex)
+                    None
+                }
+            }
+
             
 
            // println(surfaceAdjusted(0),surfaceAdjusted(1))  //surface adjusted h2h [%]
@@ -85,7 +118,7 @@ object VerifiesAllHostNames extends HostnameVerifier {
                 )
             }catch{
                 case ex:Exception =>{
-                    //println("One or more players has no record of clay matches, assuming 50% win rate")
+                    println("Warning:One or more players has no record of clay matchese")
                     println(ex)
                     None
                 }
@@ -98,7 +131,7 @@ object VerifiesAllHostNames extends HostnameVerifier {
                 )
             }catch{
                 case ex:Exception =>{
-                    //println("One or more players has no record of hard matches, assuming 50% win rate")
+                    println("Warning:One or more players has no record of hard matches")
                     println(ex)
                     None
                 }
@@ -111,7 +144,7 @@ object VerifiesAllHostNames extends HostnameVerifier {
             )
             }catch{
                     case ex:Exception =>{
-                   // println("One or more players has no record of carpet matches, assuming 50% win rate")
+                    println("One or more players has no record of carpet matches")
                     println(ex)
                     None
                 }
@@ -124,12 +157,12 @@ object VerifiesAllHostNames extends HostnameVerifier {
             )
             }catch{
                     case ex:Exception =>{
-                   // println("One or more players has no record of grass matches, assuming 50% win rate")
+                    println("One or more players has no record of grass matches")
                     println(ex)
                     None
                 }
             }
-        var bets =Array("0","0")
+        var bets =Array("","")
 
         try{
             val betHTML = Source.fromURL("https://matchstat.com/tennis/h2h-odds-bets/"+names(0)+"/"+names(1))
@@ -170,23 +203,29 @@ object VerifiesAllHostNames extends HostnameVerifier {
 
 
 
-            }catch{
-                case ex:Exception =>{
-                    println("Error fetching data")
-                    println(ex)
-                    None
-                }
-            }
-            finally {
-                return out
-            }
-
+            // }catch{
+            //     case ex:Exception =>{
+            //         println("Error fetching data")
+            //         println(ex)
+            //         None
+            //     }
+            // }
+            // finally {
+            //     return out
+            // }
+        return out
 
         }
         def decode(string:String):DisplayPlayer={
-            val html = Source.fromURL("https://www.ultimatetennisstatistics.com/autocompletePlayer?term="+string)
+            try{
+            val html = Source.fromURL("https://www.ultimatetennisstatistics.com/autocompletePlayer?term="+string.replace(' ','+'))
             val data = ujson.read(html.mkString)
-            
             return new DisplayPlayer(data(0)("label").str,data(0)("id").str.toInt)
+            }catch{
+                case ex:Exception =>{
+                    return null
+                }
+            }
+
         }
 }

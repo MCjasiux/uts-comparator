@@ -7,8 +7,10 @@ import agh.ScalaFXHelloWorld
 
 object Main extends App {
   val comparator = new Comparator()
-  val gui = ScalaFXHelloWorld
+  var output:String = " "
+
+  //val gui = ScalaFXHelloWorld
   //comparator.compare(Array(4920,4913),Clay) //djokovic i murray
- // comparator.compareGMM(Array(4920, 4913, 4742, 3819), Clay) //djokovic, murray, nadal, federer
+  comparator.compareGMM(Array(644,52602,26008), Clay) //djokovic, murray, nadal, federer
 
 }

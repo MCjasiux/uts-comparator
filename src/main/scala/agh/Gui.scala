@@ -18,20 +18,23 @@ import scalafx.beans.binding.Bindings
 import scalafx.scene.control.TextField
 import scalafx.scene.control.ChoiceBox
 import javafx.event.EventHandler
+import javafx.event.ActionEvent
 import javafx.scene.input.KeyEvent
 import javafx.scene.input.KeyCode
 import scalafx.collections.ObservableBuffer
 import scalafx.collections.ObservableArray
 import scalafx.scene.control.TableColumn._
+import scalafx.scene.control.Alert
+import scalafx.scene.control.Alert._
 import scalafx.scene.control.{TableColumn, TableView}
-
+import agh.Surface._
 import agh.DisplayPlayer
 
 
 object ScalaFXHelloWorld extends JFXApp3 {
   val fetcher = new Fetcher
   val name =  StringProperty("")
-  val enterHandler  = new EnterHandler
+  val buttonText = StringProperty("Compare!")
   val players = ObservableBuffer[DisplayPlayer]()
   val selectionProperty = StringProperty("")
   val st = Array("Hard","Grass","Carpet","Clay")
@@ -44,12 +47,37 @@ object ScalaFXHelloWorld extends JFXApp3 {
   {
     def handle(ev:KeyEvent)={
       if(ev.getCode == KeyCode.ENTER){
-        println("accept")
-        players+= fetcher.decode(textValue())
-        textValue.value = ""
+        val decoded =  fetcher.decode(textValue())
+        if(decoded == null){
+        new Alert(AlertType.Information,"No matching players found!"){
+        }.showAndWait()
+        }else{
+          players+= decoded
+          textValue.value = ""
+        }
+
+
       }
     }
   }
+  def mapPlayers(p:DisplayPlayer):Int={
+    p.id()
+  }
+  class ButtonHandler extends EventHandler[ActionEvent]
+  {
+    def handle(ev:ActionEvent)={
+      val comparator = new Comparator()
+      //val alertMessageProperty = StringProperty("Comparing players...")
+      
+      new Alert(AlertType.Information,"Comparing players..."){
+        resizable() = true
+        headerText = "Comparison:"
+        contentText = comparator.compareGMM(players.map(mapPlayers).toArray, (Surface.withNameOpt(selectionProperty()).getOrElse(Hard)))
+      }.showAndWait()
+    }
+  }
+  val enterHandler  = new EnterHandler
+  val buttonHandler = new ButtonHandler
   //val currentId =  IntegerProperty(0)
   //currentId <== fetcher.decode(name.value)
   
@@ -87,7 +115,8 @@ object ScalaFXHelloWorld extends JFXApp3 {
               textValue <==> text
             },
             new Button{
-              text = "Compare!"
+              text <== buttonText
+              onAction=buttonHandler
             },
             new ChoiceBox(surfaces){
               centerShape = true

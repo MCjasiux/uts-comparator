@@ -4,6 +4,7 @@ import breeze.linalg.{DenseMatrix, DenseVector}
 
 
 class Comparator(){
+    var output = ""
     /*
         H2H Surface adjusted		10
         Current Elo			2
@@ -88,10 +89,10 @@ class Comparator(){
         
         val completer = new Completer()
         
-        Array(h2hMatrix, rankMatrix, completer.complete(winRatioMatrix), betMatrix)
+        Array(completer.complete(h2hMatrix), rankMatrix, completer.complete(winRatioMatrix), betMatrix)
     }
 
-    def compareEVM(players: Array[Int], surface:Surface){
+    def compareEVM(players: Array[Int], surface:Surface):String={
         val fetchMatrix = fetchData(players, surface)
         val arrs = fetchMatrixes(fetchMatrix, players, surface)
         val h2hMatrix = arrs(0)
@@ -135,12 +136,13 @@ class Comparator(){
         print("\n")
 
         val result = calculateFinalWeights(h2hVector, rankVector, winRatioVector,betVector,  toWVector(characterMatrixB))
-        print("Final comparison: \n")
-        printWithNames(result, names)
-        print("\n")
-        print("Our choice: " + names(result.indexOf(result.max)))
+        output = output.concat("Final comparison: \n")
+        .concat(printWithNames(result, names))
+        .concat("\n")
+        .concat("Our choice: " + names(result.indexOf(result.max)))
+        return output
     }
-    def compareGMM(players: Array[Int],surface:Surface): Unit ={
+    def compareGMM(players: Array[Int],surface:Surface): String ={
         val fetchMatrix = fetchData(players, surface)
         val arrs = fetchMatrixes(fetchMatrix, players, surface)
         val h2hMatrix = arrs(0)
@@ -184,10 +186,11 @@ class Comparator(){
         print("\n")
 
         val result = calculateFinalWeights(h2hVectorN, rankVectorN, winRatioVectorN,betVectorN, normalizeVector(toGMMVector(characteristicsPairCompMatrix)))
-        print("Final comparison: \n")
-        printWithNames(result, names)
-        print("\n")
-        print("Our choice: " + names(result.indexOf(result.max)))
+        output = output.concat("Final comparison: \n")
+        .concat(printWithNames(result, names))
+        .concat("\n")
+        .concat("Our choice: " + names(result.indexOf(result.max)))
+        return output
     }
     def getNames(fetchMatrix: Array[Array[Any]]): Array[String] ={
         val result = Array.ofDim[String](fetchMatrix.length)
@@ -319,9 +322,10 @@ class Comparator(){
     def calculateFinalWeights(h2h: Array[Double], rank: Array[Double], ratio: Array[Double],bet: Array[Double], factorWeights: Array[Double]): Array[Double] ={
         for(i <- h2h.indices.toArray) yield h2h(i)*factorWeights(0) + rank(i)*factorWeights(1) + ratio(i)*factorWeights(2) + bet(i)*factorWeights(3)
     }
-    def printWithNames(array: Array[Double], names: Array[String]): Unit ={
+    def printWithNames(array: Array[Double], names: Array[String]): String ={
         println(names.mkString(" "))
         println(array.mkString(" "))
+        return names.mkString(" ").concat(array.mkString(" "))
     }
 
 
