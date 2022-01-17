@@ -33,6 +33,8 @@ object VerifiesAllHostNames extends HostnameVerifier {
             //var html:Option[scala.io.BufferedSource] = None
             var out: Any = 0
             try{
+
+                
             val html = Source.fromURL("https://www.ultimatetennisstatistics.com/h2hProfiles?playerId1="+id1+"&playerId2="+id2)
             val str = html.mkString
             val document = Jsoup.parse(str)
@@ -180,5 +182,11 @@ object VerifiesAllHostNames extends HostnameVerifier {
             }
 
 
+        }
+        def decode(string:String):DisplayPlayer={
+            val html = Source.fromURL("https://www.ultimatetennisstatistics.com/autocompletePlayer?term="+string)
+            val data = ujson.read(html.mkString)
+            
+            return new DisplayPlayer(data(0)("label").str,data(0)("id").str.toInt)
         }
 }
