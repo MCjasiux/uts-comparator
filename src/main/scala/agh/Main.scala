@@ -11,6 +11,6 @@ object Main extends App {
 
   //val gui = ScalaFXHelloWorld
   //comparator.compare(Array(4920,4913),Clay) //djokovic i murray
-  comparator.compareGMM(Array(644,52602,26008), Clay) //djokovic, murray, nadal, federer
+  comparator.compareGMM(Array(4913,4920), Clay) //djokovic, murray, nadal, federer
 
 }

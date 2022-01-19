@@ -300,14 +300,17 @@ class Comparator(){
 
 
     def koczkodajIndex(nrOfAlternatives: Int,  A: Array[Array[Double]]): Unit ={
+        if(nrOfAlternatives < 3){
+            return
+        }
+        val indexes = for(i <- 0 until nrOfAlternatives) yield i
+        println(indexes);
         val triads = Array.ofDim[Array[Int]](combinations(nrOfAlternatives, 3))
         var index = 0
-        for(i <- 0 to triads.length-3){
-            for(j<- i + 1 to triads.length-2){
-                for(k <- j+1 to triads.length-1){
-                    triads(index) = Array[Int](i,j,k)
-                    index+=1
-                }
+        for(i <- indexes.toSet.subsets()){
+            if(i.size == 3){
+                triads(index) = i.toArray
+                index+=1
             }
         }
         val triadInconsistencies = Array.ofDim[Double](combinations(nrOfAlternatives, 3))
