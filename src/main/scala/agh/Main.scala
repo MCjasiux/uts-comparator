@@ -9,8 +9,8 @@ object Main extends App {
   val comparator = new Comparator()
   var output:String = " "
 
-  //val gui = ScalaFXHelloWorld
+  val gui = ScalaFXHelloWorld
   //comparator.compare(Array(4920,4913),Clay) //djokovic i murray
-  comparator.compareGMM(Array(4913,4920), Clay) //djokovic, murray, nadal, federer
+  comparator.compareGMM(Array(644,4742, 4920, 3018, 3819), Clay) //djokovic, murray, nadal, federer
 
 }

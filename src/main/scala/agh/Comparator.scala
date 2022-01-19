@@ -39,6 +39,8 @@ class Comparator(){
              j <- h2hMatrix.indices
              } {
             if(i == j) h2hMatrix(i)(j) = 1.0
+            else if (fetchMatrix(i)(j).asInstanceOf[H2h].prediction(0) / fetchMatrix(i)(j).asInstanceOf[H2h].prediction(1) == 0) h2hMatrix(i)(j) = 1/99
+            else if((fetchMatrix(i)(j).asInstanceOf[H2h].prediction(0) / fetchMatrix(i)(j).asInstanceOf[H2h].prediction(1)).isInfinite) h2hMatrix(i)(j) = 99
             else h2hMatrix(i)(j) = fetchMatrix(i)(j).asInstanceOf[H2h].prediction(0) / fetchMatrix(i)(j).asInstanceOf[H2h].prediction(1)
         }
         print("\n")
